@@ -1,0 +1,84 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Perfil - JCasas</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="{% static 'estilos.css' %}">
+</head>
+<body class="bg-light">
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-5">
+            <div class="card-perfil shadow-sm p-4 bg-white rounded">
+                <h3 class="text-center mb-4" style="color: #78350f;">Mi Perfil</h3>
+
+                <div class="text-center mb-4">
+                <img src="{% if imagen_url and imagen_url != '1' %}{{ imagen_url }}{% else %}https://static.vecteezy.com/system/resources/thumbnails/052/189/266/small/user-man-account-person-people-half-body-head-stickman-stick-figure-profile-silhouette-network-contact-black-white-sign-icon-shape-outline-vector.jpg{% endif %}" 
+                    class="rounded-circle mb-3" 
+                    style="width: 150px; height: 150px; object-fit: cover;" 
+                    alt="Foto de perfil">
+                </div>
+                
+                <table class="table table-borderless">
+                    <tr><th class="text-secondary">Nombre:</th><td class="fw-bold">{{ nombre }}</td></tr>
+                    <tr><th class="text-secondary">Correo:</th><td class="fw-bold">{{ correo }}</td></tr>
+                    <tr><th class="text-secondary">Teléfono:</th><td class="fw-bold">{{ numero }}</td></tr>
+                    <tr><th class="text-secondary">Rol:</th><td><span class="badge bg-warning text-dark">{{ tipo|default:"Cliente" }}</span></td></tr>
+                </table>
+
+                <div class="d-flex justify-content-center gap-3 mt-4">
+                    <a href="{% url 'inicio' %}" class="btn btn-uniforme">Volver</a>
+                    <button type="button" class="btn btn-uniforme" data-bs-toggle="modal" data-bs-target="#modalEditarPerfil">Editar Perfil</button>
+                    <a href="{% url 'cerrar_sesion' %}" class="btn btn-uniforme">Cerrar Sesión</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalEditarPerfil" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <form action="{% url 'actualizar_perfil' %}" method="POST">
+        {% csrf_token %}
+        <div class="modal-header">
+            <h5 class="modal-title">Editar Perfil</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            <div class="mb-3">
+                <label class="form-label">Nombre:</label>
+                <input type="text" name="nombre" class="form-control" value="{{ nombre }}" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Correo:</label>
+                <input type="email" name="correo" class="form-control" value="{{ correo }}" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Teléfono:</label>
+                <input type="text" name="numero" class="form-control" value="{{ numero }}">
+            </div>
+            <div class="mb-3">
+            <label class="form-label">URL de Foto:</label>
+            <input type="text" name="imagen_url" class="form-control" 
+            value="{% if imagen_url != 'default.png' %}{{ imagen_url }}{% endif %}" 
+            placeholder="https://static.vecteezy.com/system/resources/thumbnails/052/189/266/small/user-man-account-person-people-half-body-head-stickman-stick-figure-profile-silhouette-network-contact-black-white-sign-icon-shape-outline-vector.jpg">
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            <button type="submit" class="btn btn-uniforme">Guardar Cambios</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,140 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inicio - JCasas Restaurante</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="{% static 'estilos.css' %}">
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg mb-4">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'inicio' %}">🍔 JCasas Restaurante</a>
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <div class="navbar-nav ms-auto align-items-lg-center gap-2 pt-2 pt-lg-0">
+                    
+                    {% if es_admin_o_encargado %}
+                    <button type="button" class="btn btn-sesion-custom" onclick="automatizarTodasLasImagenes()">
+                        <i class="bi bi-magic"></i> Automatizar Imágenes
+                    </button>
+
+                    <div class="nav-item dropdown">
+                        <button class="btn btn-sesion-custom dropdown-toggle" type="button" id="gestionDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            ⚙️ Gestión
+                        </button>
+                        <ul class="dropdown-menu shadow-lg border-0" aria-labelledby="gestionDropdown">
+                            <li><span class="dropdown-header fw-bold text-muted small text-uppercase">📦 Platillos</span></li>
+                            <li><a class="dropdown-item" href="{% url 'ver_productos' %}">📋 Ver Inventario</a></li>
+                            {% if es_admin %}
+                            <li><a class="dropdown-item" href="{% url 'registrar_producto' %}">➕ Registrar Platillo</a></li>
+                            {% endif %}
+                            {% if es_encargado %}
+                            <li><a class="dropdown-item" href="#">👥 Gestionar Usuarios</a></li>
+                            {% endif %}
+                            <li><hr class="dropdown-divider"></li>
+                            <li><span class="dropdown-header fw-bold text-muted small text-uppercase">🌾 Ingredientes</span></li>
+                            <li><a class="dropdown-item" href="{% url 'ver_ingredientes' %}">📋 Ver Stock</a></li>
+                            {% if es_admin %}
+                            <li><a class="dropdown-item" href="{% url 'registrar_ingrediente' %}">➕ Registrar Ingrediente</a></li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                    {% endif %}
+
+                    <a class="btn btn-sesion-custom position-relative" href="#">
+                        🛒 Carrito <span class="badge rounded-pill bg-danger" style="font-size: 0.75rem;">0</span>
+                    </a>
+                    
+                    {% if request.session.usuario_id %}
+                        <a class="btn btn-sesion-custom" href="{% url 'perfil' %}">👤 Perfil</a>
+                    {% else %}
+                        <a class="btn btn-sesion-custom" href="{% url 'inicio_sesion' %}">👤 Iniciar Sesión</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container text-center my-5">
+        <div class="card-personalizada shadow-sm p-4">
+            <h1 class="display-5 fw-bold mb-3">¡Bienvenido a JCasas!</h1>
+            {% if request.session.nombre_usuario %}
+                <h4 class="text-primary fw-bold mb-3" style="color: rgb(182, 147, 100) !important;">¡Hola, {{ request.session.nombre_usuario }}!</h4>
+            {% endif %}
+            <p class="lead text-muted mb-0">Explora las delicias disponibles o gestiona el inventario desde el panel superior.</p>
+        </div>
+    </div>
+
+    <div class="container mb-5">
+        <h2 class="mb-4">✨ Nuestro Menú Disponible</h2>
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            {% for producto in productos %}
+                {% if producto.estado %}
+                <div class="col" id="tarjeta-producto-{{ producto.id }}">
+                    <div class="card h-100 border-0 shadow-sm overflow-hidden tarjeta-menu-producto">
+                        
+                        {% if request.session.usuario_id and es_admin_o_encargado %}
+                        <button type="button" class="btn p-0 border-0 contenedor-foto-interactivo" data-bs-toggle="modal" data-bs-target="#modalImagen{{ producto.id }}">
+                            <img src="{{ producto.imagen|default:'https://loremflickr.com/600/400/food' }}" class="w-100 h-100 object-fit-cover img-platillo" alt="{{ producto.nombre }}">
+                        </button>
+                        {% else %}
+                        <div class="contenedor-foto-interactivo">
+                            <img src="{{ producto.imagen|default:'https://loremflickr.com/600/400/food' }}" class="w-100 h-100 object-fit-cover img-platillo" alt="{{ producto.nombre }}">
+                        </div>
+                        {% endif %}
+
+                        <div class="card-body p-4">
+                            <h5 class="card-title nombre-producto-title">{{ producto.nombre }}</h5>
+                            <p class="text-muted">{{ producto.descripcion }}</p>
+                            <div class="d-flex justify-content-between align-items-center mt-3">
+                                <span class="fs-4 fw-bold">${{ producto.precio }}</span>
+                                <button class="btn btn-primary" style="background-color: rgb(182, 147, 100); border-color: rgb(182, 147, 100);">+ Añadir</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+{% if request.session.usuario_id and es_admin_o_encargado %}
+<div class="modal fade" id="modalImagen{{ producto.id }}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form method="POST" action="{% url 'cambiar_imagen_producto' producto.id %}">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title">Editar imagen: {{ producto.nombre }}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <label class="form-label">URL de la imagen:</label>
+                    <input type="text" name="nueva_imagen" class="form-control" value="{{ producto.imagen|default:'' }}" required>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">💾 Guardar cambios</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endif %}
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const URL_CAMBIAR_IMAGEN = "{% url 'cambiar_imagen_producto' 0 %}";
+        const CSRF_TOKEN = "{{ csrf_token }}";
+    </script>
+    <script src="{% static 'js/scripts.js' %}"></script>
+</body>
+</html>

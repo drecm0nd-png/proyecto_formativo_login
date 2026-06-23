@@ -1,0 +1,134 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Constituir Receta - {{ producto.nombre }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'estilos.css' %}">
+    <style>
+        .ingrediente-card {
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid #dee2e6;
+        }
+        .ingrediente-card:hover {
+            border-color: #d97706;
+            transform: translateY(-2px);
+        }
+        /* Color de éxito al estar seleccionado */
+        .ingrediente-seleccionado {
+            background-color: #d1e7dd !important;
+            border-color: #198754 !important;
+        }
+        .cantidad-input {
+            display: none;
+        }
+    </style>
+</head>
+<body class="bg-light">
+
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'inicio' %}">📦 JCasas App</a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="{% url 'inicio' %}">Inicio</a>
+                <a class="nav-link" href="{% url 'ver_productos' %}">Volver a Inventario</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-5" style="max-width: 900px;">
+        <div class="card-personalizada p-4 mb-4">
+            <h2 style="color: #78350f;">🍳 Armar Receta para: {{ producto.nombre }}</h2>
+            <p class="text-muted">Selecciona los ingredientes que componen este plato haciendo clic sobre ellos e ingresa la cantidad necesaria.</p>
+            <hr style="border-color: #fcd34d;">
+
+            <form method="POST" action="{% url 'constituir_ingredientes' producto.id %}">
+                {% csrf_token %}
+                <input type="hidden" name="accion" value="asociar_ingrediente">
+
+                <div class="row g-3 mb-4">
+                    {% for ing in todos_los_ingredientes %}
+                    <div class="col-md-6">
+                        <div class="card p-3 ingrediente-card h-100" id="card_{{ ing.id }}" onclick="seleccionarIngrediente('{{ ing.id }}')">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-1 fw-bold">{{ ing.nombre }}</h6>
+                                    <small class="text-muted">Stock actual: {{ ing.cantidad }}</small>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="ingrediente_ids" value="{{ ing.id }}" id="check_{{ ing.id }}" style="pointer-events: none;">
+                                </div>
+                            </div>
+                            <div class="mt-2 cantidad-input" id="div_cantidad_{{ ing.id }}">
+                                <input type="text" name="cantidad_{{ ing.id }}" class="form-control form-control-sm" placeholder="Ej: 200gr, 2 unidades, 1 rebanada" onclick="event.stopPropagation();">
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="col-12 text-center p-4 text-muted">
+                        No hay ingredientes disponibles en el almacén global. ¡Crea uno abajo!
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center border-top pt-3">
+                    <button class="btn btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#collapseNuevoIng">
+                        ➕ Crear ingrediente faltante
+                    </button>
+                    <button type="submit" class="btn-calido" style="background-color: #28a745 !important; color: white;">
+                        💾 Guardar y Enviar Lista Constituida
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <div class="collapse mb-5" id="collapseNuevoIng">
+            <div class="card card-body bg-white shadow-sm border-warning">
+                <h5 class="fw-bold text-dark">✨ Registrar Ingrediente al Almacén General</h5>
+                <form method="POST" action="{% url 'constituir_ingredientes' producto.id %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="accion" value="crear_rapido">
+                    
+                    <div class="row g-3">
+                        <div class="col-md-5">
+                            <label class="form-label">Nombre:</label>
+                            {{ form_ingrediente.nombre }}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Stock en bodega inicial:</label>
+                            {{ form_ingrediente.cantidad }}
+                        </div>
+                        <div class="col-md-3 d-flex align-items-end">
+                            <button type="submit" class="btn btn-dark w-100">Registrar e Incluir</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function seleccionarIngrediente(id) {
+            const card = document.getElementById('card_' + id);
+            const checkbox = document.getElementById('check_' + id);
+            const divCantidad = document.getElementById('div_cantidad_' + id);
+
+            // Alternar estado del checkbox
+            checkbox.checked = !checkbox.checked;
+
+            // Alternar clases visuales de Bootstrap y visibilidad del input de cantidad
+            if (checkbox.checked) {
+                card.classList.add('ingrediente-seleccionado');
+                divCantidad.style.display = 'block';
+            } else {
+                card.classList.remove('ingrediente-seleccionado');
+                divCantidad.style.display = 'none';
+            }
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

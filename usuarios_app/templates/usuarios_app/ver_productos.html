@@ -1,0 +1,99 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventario de Platillo</title>
+    <link rel="stylesheet" href="{% static 'estilos.css' %}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'inicio' %}">📦 JCasas App</a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="{% url 'inicio' %}">Inicio</a>
+                <a class="nav-link" href="{% url 'registrar_producto' %}">Registrar Platillo</a>
+                <a class="nav-link active" href="{% url 'ver_productos' %}">Ver Inventario</a>
+            </div>
+        </div>
+    </nav>
+
+    <form method="POST" action="{% url 'alterar_producto' 0 %}">
+        {% csrf_token %}
+        
+        <div class="container-fluid px-4 mt-4">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 style="color: #78350f;">Inventario y Modificación de Platillos</h2>
+                <div class="d-flex gap-2">
+                    <button type="submit" name="accion" value="guardar_todo" class="btn-calido" style="background-color: #28a745 !important; color: white;">
+                        💾 Guardar Todos los Cambios
+                    </button>
+                    <a href="{% url 'inicio' %}" class="btn-calido">🏠 Volver al Inicio</a>
+                </div>
+            </div>
+
+            <div class="card-personalizada p-3">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover align-middle">
+                        <thead class="table-dark">
+                            <tr>
+                                <th style="width: 12%;">Código</th>
+                                <th style="width: 15%;">Nombre</th>
+                                <th style="width: 23%;">Descripción</th>
+                                <th style="width: 15%;">Stock / Unidad Medida</th>
+                                <th style="width: 12%;">Precio ($)</th>
+                                <th style="width: 8%;">Estado</th>
+                                <th style="width: 15%;">Acciones Rápidas</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for producto in productos %}
+                            <tr>
+                                <input type="hidden" name="producto_ids" value="{{ producto.id }}">
+                                
+                                <td><strong>{{ producto.codigo }}</strong></td>
+                                <td><input type="text" name="nombre_{{ producto.id }}" value="{{ producto.nombre }}" class="form-control form-control-sm" required></td>
+                                <td><input type="text" name="descripcion_{{ producto.id }}" value="{{ producto.descripcion }}" class="form-control form-control-sm" required></td>
+                                <td><input type="text" name="unidad_medida_{{ producto.id }}" value="{{ producto.unidad_medida }}" class="form-control form-control-sm" required></td>
+                                <td><input type="number" name="precio_{{ producto.id }}" value="{{ producto.precio }}" class="form-control form-control-sm" min="0" required></td>
+                                <td>
+                                    {% if producto.estado %}
+                                    <span class="badge bg-success">Activo</span>
+                                    {% else %}
+                                    <span class="badge bg-danger">Inactivo</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="d-flex gap-1">
+                                        <a href="{% url 'constituir_ingredientes' producto.id %}" class="btn-calido btn-calido-sm text-center text-white d-inline-flex align-items-center justify-content-center" style="background-color: #d97706 !important; width: 32px; height: 31px; padding: 0;" title="Propiedades / Composición de Ingredientes">
+                                            ⚙️
+                                        </a>
+
+                                        {% if producto.estado %}
+                                        <button type="submit" formaction="{% url 'alterar_producto' producto.id %}" name="accion" value="cambiar_estado" class="btn-calido btn-calido-sm" style="background-color: #78350f !important;" title="Desactivar">Desactivar</button>
+                                        {% else %}
+                                        <button type="submit" formaction="{% url 'alterar_producto' producto.id %}" name="accion" value="cambiar_estado" class="btn-calido btn-calido-sm" title="Activar">Activar</button>
+                                        {% endif %}
+
+                                        <button type="submit" formaction="{% url 'alterar_producto' producto.id %}" name="accion" value="eliminar_producto" class="btn-calido btn-calido-sm" style="background-color: #dc3545 !important;" title="Eliminar" onclick="return confirm('¿Seguro que deseas eliminar permanentemente este producto?');">🗑️</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="7" class="text-center text-muted p-4">No hay productos registrados todavía.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

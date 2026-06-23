@@ -1,0 +1,150 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciar Sesión - JCasas</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="{% static 'estilos.css' %}">
+    <style>
+        .seccion-imagen-contenedor {
+            width: 100%;
+            height: 100vh;
+            object-fit: cover;
+        }
+        .fade-in-custom {
+            animation: fadeIn 0.3s ease-in-out forwards;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container-fluid p-0 position-relative">
+        
+        <!-- Enlace superior idéntico en estilo, color y comportamiento -->
+        <a href="{% url 'inicio_sesion' %}" class="text-decoration-none small fw-bold d-inline-flex align-items-center gap-2 position-absolute" style="top: 20px; left: 20px; color: #3e3221; opacity: 0.7; transition: all 0.2s; z-index: 10;" onmouseover="this.style.opacity='1'; this.style.transform='translateX(-3px)';" onmouseout="this.style.opacity='0.7'; this.style.transform='translateX(0)';">
+            <i class="bi bi-arrow-left fs-5"></i> Volver al ingreso
+        </a>
+
+        <div class="row g-0 pantalla-dividida" style="min-height: 100vh;">
+            
+            <!-- SECCIÓN FORMULARIO UNIFORME -->
+            <div class="col-12 col-lg-6 seccion-formulario d-flex align-items-center justify-content-center py-5">
+                <div class="contenedor-login text-center" style="max-width: 400px; width: 100%; padding: 0 20px;">
+                    
+                    <!-- Imagen de Logo con idéntico tamaño y borde redondo -->
+                    <div class="mb-3 d-flex justify-content-center">
+                        <img src="{% static 'imagenes/logo.png' %}" alt="JCasas Logo" class="img-fluid rounded-circle border shadow-sm" style="width: 120px; height: 120px; object-fit: cover;">
+                    </div>
+                    
+                    <!-- Títulos idénticos en tipografía y paleta -->
+                    <h2 class="fw-bold mb-1" style="color: #3e3221;">JCasas</h2>
+                    
+                    <!-- ==========================================
+                         PASO 1: SOLICITAR CÓDIGO
+                         ========================================== -->
+                    <div id="bloque-solicitud" class="fade-in-custom">
+                        <p class="text-muted small mb-4">Ingresa para recuperar tu cuenta</p>
+                        
+                        <form method="POST" action="" onsubmit="mostrarFormularioCodigo(event)">
+                            {% csrf_token %}
+                            
+                            <div class="text-start mb-4">
+                                <label class="form-label small fw-bold" style="color: #3e3221;">Correo electrónico o Teléfono</label>
+                                <div class="input-group input-login-group">
+                                    <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                                    <input type="text" name="identificador" class="form-control" placeholder="carlos@ejemplo.com o 3001234567" required>
+                                </div>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-calido btn-login-submit w-100 py-2.5 mb-4">
+                                Enviar Código de Verificación
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- ==========================================
+                         PASO 2: FORMULARIO INTERACTIVO DE VALIDACIÓN
+                         ========================================== -->
+                    <div id="bloque-codigo" class="fade-in-custom d-none">
+                        <p class="text-muted small mb-4">Ingresa el código enviado junto a tu nueva clave</p>
+                        
+                        <form method="POST" action="">
+                            {% csrf_token %}
+                            
+                            <div class="text-start mb-3">
+                                <label class="form-label small fw-bold" style="color: #3e3221;">Código de Seguridad</label>
+                                <div class="input-group input-login-group">
+                                    <span class="input-group-text"><i class="bi bi-shield-check"></i></span>
+                                    <input type="text" name="codigo_verificacion" class="form-control text-center fw-bold" placeholder="••••••" maxlength="6" style="letter-spacing: 2px;" required>
+                                </div>
+                            </div>
+
+                            <div class="text-start mb-4">
+                                <label class="form-label small fw-bold" style="color: #3e3221;">Nueva Contraseña</label>
+                                <div class="input-group input-login-group">
+                                    <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                                    <input type="password" name="nueva_contrasena" id="inputPassword" class="form-control" placeholder="••••••••" required>
+                                    <button type="button" class="input-group-text pe-3 text-muted" onclick="togglePasswordVisibility()">
+                                        <i class="bi bi-eye-slash" id="toggleIcon"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-calido btn-login-submit w-100 py-2.5 mb-4">
+                                Restablecer Contraseña
+                            </button>
+
+                            <div class="text-center">
+                                <a href="#" class="enlace-olvido" onclick="regresarPasoUno(event)">Modificar correo electrónico</a>
+                            </div>
+                        </form>
+                    </div>
+                    
+                </div>
+            </div>
+            
+            <!-- SECCIÓN IMAGEN DERECHA (Usa tu etiqueta exacta con el fallback de respaldo) -->
+            <div class="col-lg-6 d-none d-lg-block p-0">
+                <img src="{% static 'imagenes/restaurante.jpg' %}" alt="Ambiente JCasas" class="seccion-imagen-contenedor" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=1200';">
+            </div>
+            
+        </div>
+    </div>
+
+    <script>
+        function mostrarFormularioCodigo(event) {
+            event.preventDefault(); 
+            document.getElementById('bloque-solicitud').classList.add('d-none');
+            document.getElementById('bloque-codigo').classList.remove('d-none');
+        }
+
+        function regresarPasoUno(event) {
+            event.preventDefault();
+            document.getElementById('bloque-codigo').classList.add('d-none');
+            document.getElementById('bloque-solicitud').classList.remove('d-none');
+        }
+
+        function togglePasswordVisibility() {
+            const passwordInput = document.getElementById('inputPassword');
+            const toggleIcon = document.getElementById('toggleIcon');
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleIcon.classList.remove('bi-eye-slash');
+                toggleIcon.classList.add('bi-eye');
+            } else {
+                passwordInput.type = 'password';
+                toggleIcon.classList.remove('bi-eye');
+                toggleIcon.classList.add('bi-eye-slash');
+            }
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

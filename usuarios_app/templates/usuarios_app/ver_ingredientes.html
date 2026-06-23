@@ -1,0 +1,72 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Almacén de Ingredientes</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'estilos.css' %}">
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'inicio' %}">📦 JCasas App</a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="{% url 'inicio' %}">Inicio</a>
+                <a class="nav-link" href="{% url 'registrar_ingrediente' %}">Registrar Nuevo</a>
+            </div>
+        </div>
+    </nav>
+
+    <form method="POST" action="{% url 'alterar_ingrediente' 0 %}">
+        {% csrf_token %}
+        
+        <div class="container px-4 mt-4" style="max-width: 1000px;">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 style="color: #78350f;">📋 Stock Global de Ingredientes</h2>
+                <div class="d-flex gap-2">
+                    <button type="submit" name="accion" value="guardar_todo" class="btn-calido" style="background-color: #28a745 !important; color: white;">
+                        💾 Guardar Modificaciones en Masa
+                    </button>
+                </div>
+            </div>
+
+            <div class="card-personalizada p-3">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover align-middle">
+                        <thead class="table-dark">
+                            <tr>
+                                <th style="width: 25%;">Código UUID</th>
+                                <th style="width: 35%;">Nombre de Insumo</th>
+                                <th style="width: 25%;">Stock / Cantidad</th>
+                                <th style="width: 15%;" class="text-center">Eliminar</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for ing in ingredientes %}
+                            <tr>
+                                <input type="hidden" name="ingrediente_ids" value="{{ ing.id }}">
+                                <td><strong>{{ ing.codigo }}</strong></td>
+                                <td><input type="text" name="nombre_{{ ing.id }}" value="{{ ing.nombre }}" class="form-control form-control-sm" required></td>
+                                <td><input type="text" name="cantidad_{{ ing.id }}" value="{{ ing.cantidad }}" class="form-control form-control-sm" required></td>
+                                <td class="text-center">
+                                    <button type="submit" formaction="{% url 'alterar_ingrediente' ing.id %}" name="accion" value="eliminar_ingrediente" class="btn btn-danger btn-sm" onclick="return confirm('¿Eliminar este ingrediente de la base de datos?');">🗑️</button>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-center text-muted p-4">No hay materias primas cargadas en este momento.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
