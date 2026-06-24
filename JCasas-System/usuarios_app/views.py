@@ -13,6 +13,9 @@ from .forms import ProductoForm, IngredienteForm
 def mostrar_mensaje(request):
     return HttpResponse("Retornando un saludo al cliente de la aplicación")
 
+
+
+
 def mostrar_pagina_inicio(request):
     productos = Producto.objects.all()
     usuario = None
